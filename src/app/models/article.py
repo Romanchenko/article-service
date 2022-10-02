@@ -21,7 +21,7 @@ class Article(BaseModel):
     created: datetime = Field(default_factory=datetime.utcnow)
     updated: datetime = Field(default_factory=datetime.utcnow)
     doi: str = None
-    fos: str = None
+    fos: List[str] = []
     isbn: str = None
     issn: str = None
     issue: str = None
@@ -31,7 +31,7 @@ class Article(BaseModel):
     page_end: float = None
     page_start: float = None
     pdf: str = None
-    url: str = None
+    url: List[str] = []
     venue_id: PyObjectId = None
     venue_name: str = None
 
