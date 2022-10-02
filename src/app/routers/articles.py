@@ -1,4 +1,4 @@
-from uuid import UUID
+from bson import ObjectId
 
 from .id_info import IdInfo
 from .. import storage
@@ -10,7 +10,7 @@ router = APIRouter()
 
 
 @router.get("/articles/{id}", tags=["articles"], response_model=Article)
-def get_article(id: UUID):
+def get_article(id: ObjectId):
     result = find_article(id)
     if result is None:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -24,12 +24,12 @@ def post_article(article: Article):
 
 
 @router.post("/articles/{id}", tags=["articles"])
-def update_article(id: UUID, article: Article):
+def update_article(id: ObjectId, article: Article):
     if find_article(id) is None:
         raise HTTPException(status_code=404, detail="Item not found")
     storage.articles_storage.update_article(article)
 
 
 @router.delete("/articles/{id}", tags=["articles"])
-def delete_article(id: UUID):
+def delete_article(id: ObjectId):
     storage.articles_storage.delete_article(id)
