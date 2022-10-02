@@ -21,7 +21,7 @@ def get_author(id: ObjectId):
 @router.post("/authors", tags=["authors"], response_model=IdInfo)
 def post_author(article: Author):
     insert_author(article)
-    return IdInfo(id=article.id)
+    return IdInfo(id=str(article.id))
 
 
 @router.post("/authors/{id}", tags=["authors"])

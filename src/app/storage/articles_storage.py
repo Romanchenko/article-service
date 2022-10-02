@@ -25,5 +25,7 @@ def delete_article(document_id: ObjectId):
 
 
 def deserialize(article_document):
+    if article_document is None:
+        return None
     article_document['id'] = article_document.pop('_id')
     return Article.parse_obj(article_document)
