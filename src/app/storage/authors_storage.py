@@ -1,10 +1,10 @@
 from bson import ObjectId
 
 from ..models.author import Author
-from mongo_client import client
+from .mongo_client import client
 
 COLLECTION_NAME = 'authors'
-COLLECTION = client[COLLECTION_NAME]
+COLLECTION = client['main'][COLLECTION_NAME]
 ID_FIELD = '_id'
 
 
@@ -25,5 +25,7 @@ def delete_author(document_id: ObjectId):
 
 
 def deserialize(author_document):
+    if author_document is None:
+        return None
     author_document['id'] = author_document.pop('_id')
     return Author.parse_obj(author_document)
