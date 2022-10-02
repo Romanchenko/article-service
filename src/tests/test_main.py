@@ -1,3 +1,4 @@
+import hashlib
 import json
 
 from starlette.testclient import TestClient
@@ -51,3 +52,16 @@ def test_insert_author():
     delete_r = client.delete(f"/authors/{author_id}")
     assert delete_r.status_code == 200
     assert client.get(f"/authors/{author_id}").status_code == 404
+
+
+def test_insert_user():
+    response = client.post("/users", json={'login': 'Ivan Ivanov', 'password': 'qwerty1234'})
+    assert response.status_code == 200
+    user_id = response.json()['id']
+    user_response = client.get(f"/users/{user_id}")
+    assert user_response.status_code == 200
+    assert user_response.json()['login'] == 'Ivan Ivanov'
+    assert user_response.json()['password_hash'] == hashlib.md5('qwerty1234'.encode('utf-8')).hexdigest()
+    deletion_response = client.delete(f"/users/{user_id}")
+    assert deletion_response.status_code == 200
+    assert client.get(f"/users/{user_id}").status_code == 404

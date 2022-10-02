@@ -2,7 +2,6 @@ from bson import ObjectId
 from fastapi import APIRouter, HTTPException
 
 from .. import storage
-from ..storage.articles_storage import find_article
 from ..storage.authors_storage import insert_author, find_author
 from ..models.author import Author
 from .id_info import IdInfo
@@ -20,17 +19,17 @@ def get_author(id: str):
 
 
 @router.post("/authors", tags=["authors"], response_model=IdInfo)
-def post_author(article: Author):
-    insert_author(article)
-    return IdInfo(id=str(article.id))
+def post_author(author: Author):
+    insert_author(author)
+    return IdInfo(id=str(author.id))
 
 
 @router.post("/authors/{id}", tags=["authors"])
-def update_article(id: str, article: Author):
+def update_author(id: str, author: Author):
     id = ObjectId(id)
-    if find_article(id) is None:
+    if find_author(id) is None:
         raise HTTPException(status_code=404, detail="Item not found")
-    storage.authors_storage.update_author(article)
+    storage.authors_storage.update_author(author)
 
 
 @router.delete("/authors/{id}", tags=["authors"])
