@@ -1,9 +1,9 @@
 from copy import deepcopy
 from datetime import datetime
-import uuid
 from typing import List, Dict
-from pydantic import BaseModel, Field, validator, BaseConfig
+
 from bson.objectid import ObjectId
+from pydantic import BaseModel, Field, BaseConfig
 
 from .py_objectid import PyObjectId
 
@@ -13,11 +13,11 @@ ID_FIELD = '_id'
 class Article(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId)
     title: str
-    authors: List[ObjectId] = []
+    authors: List[PyObjectId] = []
     abstract: str = None
     conference: str = None
     year: int
-    references: List[ObjectId] = []
+    references: List[PyObjectId] = []
     created: datetime = Field(default_factory=datetime.utcnow)
     updated: datetime = Field(default_factory=datetime.utcnow)
     doi: str = None
@@ -32,7 +32,7 @@ class Article(BaseModel):
     page_start: float = None
     pdf: str = None
     url: str = None
-    venue_id: ObjectId = None
+    venue_id: PyObjectId = None
     venue_name: str = None
 
     def serialize(self) -> Dict:
