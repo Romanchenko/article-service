@@ -2,7 +2,7 @@ version: '3'
 
 services:
   web:
-    build: ./src
+    image: apollin/article-service-v1
     command: uvicorn app.main:app --reload --workers 1 --host 0.0.0.0 --port 8000
     volumes:
       - ./src/:/usr/src/app/
@@ -15,6 +15,15 @@ services:
 
   db:
     image: mongo:5.0
+
     environment:
       - MONGO_INITDB_ROOT_USERNAME=made
       - MONGO_INITDB_ROOT_PASSWORD=password
+
+    volumes:
+      - mongodb-volume:/data/db
+      - ./mongo_seed:/mongo_seed
+      - ./mongo_seed:/docker-entrypoint-initdb.d
+
+volumes:
+        mongodb-volume:
