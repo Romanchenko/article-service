@@ -7,3 +7,10 @@ class IdInfo(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
+
+
+class TokenInfo(BaseModel):
+    token: str
+
+    class Config:
+        arbitrary_types_allowed = True

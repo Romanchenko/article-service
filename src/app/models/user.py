@@ -6,6 +6,8 @@ from typing import Dict
 
 from pydantic import BaseModel, Field
 
+from models.py_objectid import PyObjectId
+
 
 class User(BaseModel):
     id: uuid.UUID = Field(default_factory=uuid.uuid4)
@@ -13,6 +15,7 @@ class User(BaseModel):
     password_hash: str
     created: datetime = Field(default_factory=datetime.utcnow)
     updated: datetime = Field(default_factory=datetime.utcnow)
+    user_token: PyObjectId = Field(default_factory=PyObjectId)
 
     def __init__(self, **kwargs):
         if "password" in kwargs:
@@ -24,3 +27,8 @@ class User(BaseModel):
         d = deepcopy(self.__dict__)
         d['_id'] = d.pop('id')
         return d
+
+
+class UserCredentials(BaseModel):
+    login: str
+    password: str
