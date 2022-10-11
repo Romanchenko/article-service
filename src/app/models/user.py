@@ -4,9 +4,10 @@ import hashlib
 import uuid
 from typing import Dict
 
-from pydantic import BaseModel, Field
+from bson import ObjectId
+from pydantic import BaseModel, Field, BaseConfig
 
-from models.py_objectid import PyObjectId
+from .py_objectid import PyObjectId
 
 
 class User(BaseModel):
@@ -28,7 +29,8 @@ class User(BaseModel):
         d['_id'] = d.pop('id')
         return d
 
+    class Config:
+        BaseConfig.arbitrary_types_allowed = True
+        allow_population_by_field_name = True
+        json_encoders = {ObjectId: str}
 
-class UserCredentials(BaseModel):
-    login: str
-    password: str

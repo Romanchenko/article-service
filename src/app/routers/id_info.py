@@ -10,7 +10,8 @@ class IdInfo(BaseModel):
 
 
 class TokenInfo(BaseModel):
-    token: str
+    access_token: str
+    token_type: str = "bearer"
 
     class Config:
         arbitrary_types_allowed = True

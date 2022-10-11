@@ -1,12 +1,14 @@
 from uuid import UUID
 
+from bson import ObjectId
+
 from ..models.user import User
 from .mongo_client import client
 
 COLLECTION_NAME = 'users'
 COLLECTION = client['main'][COLLECTION_NAME]
 ID_FIELD = '_id'
-TOKEN_FIELD = "token"
+TOKEN_FIELD = "user_token"
 LOGIN_FIELD = "login"
 PASSWORD_HASH_FIELD = "password_hash"
 
@@ -32,7 +34,7 @@ def delete_user(document_id: UUID):
 
 
 def find_by_token(token: str):
-    return deserialize(COLLECTION.find_one({TOKEN_FIELD: token}))
+    return deserialize(COLLECTION.find_one({TOKEN_FIELD: ObjectId(token)}))
 
 
 def deserialize(user_document):
