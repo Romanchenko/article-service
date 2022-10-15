@@ -1,9 +1,10 @@
 from bson import ObjectId
+from typing import List
 
 from .id_info import IdInfo
 from .. import storage
 from fastapi import APIRouter, HTTPException
-from ..storage.articles_storage import find_article, insert_article
+from ..storage.articles_storage import find_article, find_article_by_field, insert_article
 from ..models.article import Article
 
 router = APIRouter()
@@ -36,3 +37,8 @@ def update_article(id: str, article: Article):
 def delete_article(id: str):
     id = ObjectId(id)
     storage.articles_storage.delete_article(id)
+
+
+@router.get("/articles", tags=["articles"], response_model=List[Article])
+def get_articles_by_field(field: str, value: str, full_match: bool):
+    return find_article_by_field(field, value, full_match)

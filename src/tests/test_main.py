@@ -1,10 +1,12 @@
 import hashlib
 import json
+from bson import ObjectId
 
 from starlette.testclient import TestClient
 from app.main import app
 
 from app.models.article import Article
+from app.storage.articles_storage import find_article_by_field, drop_database
 
 client = TestClient(app)
 
@@ -40,6 +42,37 @@ def test_delete_document():
 
     r = client.get(f"/articles/{doc_id}")
     assert r.status_code == 404
+
+
+def test_search_by_field():
+    drop_database()
+    response = client.post("/articles", json={'title': 'B', 'year': int(2022)})
+    assert response.status_code == 200
+    response = client.post("/articles", json={'title': 'A', 'year': int(2022)})
+    assert response.status_code == 200
+    response = client.post("/articles", json={'title': 'A', 'year': int(2022)})
+    assert response.status_code == 200
+    response = client.post("/articles", json={'title': 'Aa', 'year': int(2022)})
+    assert response.status_code == 200
+    response = client.post("/articles", json={'title': 'A B', 'year': int(2022)})
+    assert response.status_code == 200
+    response = client.post("/articles", json={'title': 'A A', 'year': int(2022)})
+    assert response.status_code == 200
+    assert {article.title for article in find_article_by_field('title', 'A', full_match=True)} == {'A'}
+    assert {article.title for article in find_article_by_field('title', 'A', full_match=False)} == {'A', 'Aa',
+                                                                                                    'A B', 'A A'}
+
+    assert {article.title for article in find_article_by_field('title', 'B', full_match=True)} == {'B'}
+    assert {article.title for article in find_article_by_field('title', 'B', full_match=False)} == {'B', 'A B'}
+
+    assert {article.title for article in find_article_by_field('title', 'A B', full_match=True)} == {'A B'}
+    assert {article.title for article in find_article_by_field('title', 'A B', full_match=False)} == {'A B'}
+
+    assert {article.title for article in find_article_by_field('title', 'A A', full_match=True)} == {'A A'}
+    assert {article.title for article in find_article_by_field('title', 'A A', full_match=False)} == {'A A'}
+
+    assert {article.title for article in find_article_by_field('title', 'A B C', full_match=True)} == set()
+    assert {article.title for article in find_article_by_field('title', 'A B C', full_match=False)} == set()
 
 
 def test_insert_author():
