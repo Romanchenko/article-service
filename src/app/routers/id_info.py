@@ -7,3 +7,11 @@ class IdInfo(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
+
+
+class TokenInfo(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+
+    class Config:
+        arbitrary_types_allowed = True

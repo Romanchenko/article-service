@@ -1,6 +1,7 @@
 from bson import ObjectId
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 
+from .auth import oauth2_scheme, get_user
 from .. import storage
 from ..storage.authors_storage import insert_author, find_author
 from ..models.author import Author
@@ -10,7 +11,8 @@ router = APIRouter()
 
 
 @router.get("/authors/{id}", tags=["authors"], response_model=Author)
-def get_author(id: str):
+def get_author(id: str, token: str = Depends(oauth2_scheme)):
+    user = get_user(token)
     id = ObjectId(id)
     result = find_author(id)
     if result is None:
@@ -19,13 +21,15 @@ def get_author(id: str):
 
 
 @router.post("/authors", tags=["authors"], response_model=IdInfo)
-def post_author(author: Author):
+def post_author(author: Author, token: str = Depends(oauth2_scheme)):
+    user = get_user(token)
     insert_author(author)
     return IdInfo(id=str(author.id))
 
 
 @router.post("/authors/{id}", tags=["authors"])
-def update_author(id: str, author: Author):
+def update_author(id: str, author: Author, token: str = Depends(oauth2_scheme)):
+    user = get_user(token)
     id = ObjectId(id)
     if find_author(id) is None:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -33,6 +37,7 @@ def update_author(id: str, author: Author):
 
 
 @router.delete("/authors/{id}", tags=["authors"])
-def delete_article(id: str):
+def delete_article(id: str, token: str = Depends(oauth2_scheme)):
+    user = get_user(token)
     id = ObjectId(id)
     storage.authors_storage.delete_author(id)
