@@ -1,4 +1,4 @@
-version: '3'
+version: '3.4'
 
 services:
   web:
@@ -26,6 +26,13 @@ services:
       - mongodb-volume:/data/db
       - ./mongo_seed:/mongo_seed
       - ./mongo_seed:/docker-entrypoint-initdb.d
+
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo db:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
 
 volumes:
         mongodb-volume:
