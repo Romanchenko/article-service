@@ -69,3 +69,8 @@ Service for articles recommendations
   "updated" : "2022-09-24T00:00:00.000Z"
 }
 ```
+## Как поднять локально
+```docker-compose up -d```
+
+После этого можно запустить тесты
+```docker-compose run web pytest```
