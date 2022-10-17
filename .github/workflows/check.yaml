@@ -20,6 +20,6 @@ jobs:
           docker-compose -f docker-compose-test.yaml up -d
           sleep 10
           docker-compose -f docker-compose-test.yaml run web pytest 
-          docker-compose down --remove-orphans
+          docker-compose -f docker-compose-test.yaml down --remove-orphans
       
 
