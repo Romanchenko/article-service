@@ -28,7 +28,15 @@ services:
       - ./mongo_seed:/docker-entrypoint-initdb.d
 
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongo db:27017/test --quiet
+      test:
+        [
+          "CMD",
+          "mongo",
+          "--quiet",
+          "127.0.0.1/test",
+          "--eval",
+          "'quit(db.runCommand({ ping: 1 }).ok ? 0 : 2)'",
+        ]
       interval: 10s
       timeout: 10s
       retries: 5
