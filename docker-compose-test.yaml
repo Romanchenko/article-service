@@ -3,7 +3,7 @@ version: '3.4'
 services:
   web:
     build: ./src
-    command: ./wait-for-it.sh db:27017 -- uvicorn app.main:app --reload --workers 1 --host 0.0.0.0 --port 8000
+    command: sleep 10; uvicorn app.main:app --reload --workers 1 --host 0.0.0.0 --port 8000
     volumes:
       - ./src/:/usr/src/app/
     ports:
