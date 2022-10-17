@@ -21,3 +21,4 @@ RUN set -eux \
 
 # copy project
 COPY . /usr/src/app/
+RUN chmod +x ./run.sh
