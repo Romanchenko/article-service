@@ -1,6 +1,5 @@
 from bson import ObjectId
 from typing import List, Optional
-from typing_extensions import TypedDict
 
 from .auth import oauth2_scheme, get_user
 from .id_info import IdInfo
@@ -8,12 +7,7 @@ from .. import storage
 from fastapi import APIRouter, HTTPException, Depends
 from ..storage.articles_storage import find_article, find_article_by_field, insert_article
 from ..models.article import Article
-
-
-class SearchFieldRequest(TypedDict):
-    field: str
-    value: str
-    full_match: bool
+from ..models.search_field_request import SearchFieldRequest
 
 
 router = APIRouter()

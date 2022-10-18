@@ -2,6 +2,7 @@ from typing import List
 
 from bson import ObjectId
 
+from ..models.search_field_request import SearchFieldRequest
 from .authors_storage import find_authors_by_name
 from .mongo_client import client
 from ..models.article import ID_FIELD, Article
@@ -18,7 +19,8 @@ def find_article(document_id: ObjectId):
     return deserialize(COLLECTION.find_one({ID_FIELD: document_id}))
 
 
-def find_article_by_field(search_request):
+def find_article_by_field(search_request: List[SearchFieldRequest]):
+    search_request.sort(key=lambda x: x['field'])
     expr = {'$and': []}
     for triple in search_request:
         field, value, full_match = triple.values()
