@@ -1,11 +1,19 @@
 from bson import ObjectId
-from typing import List
+from typing import List, Optional
+from typing_extensions import TypedDict
 
 from .id_info import IdInfo
 from .. import storage
 from fastapi import APIRouter, HTTPException
 from ..storage.articles_storage import find_article, find_article_by_field, insert_article
 from ..models.article import Article
+
+
+class SearchFieldRequest(TypedDict):
+    field: str
+    value: str
+    full_match: bool
+
 
 router = APIRouter()
 
@@ -40,5 +48,5 @@ def delete_article(id: str):
 
 
 @router.get("/articles", tags=["articles"], response_model=List[Article])
-def get_articles_by_field(field: str, value: str, full_match: bool):
-    return find_article_by_field(field, value, full_match)
+def get_articles_by_field(search_request: List[SearchFieldRequest]):
+    return find_article_by_field(search_request)
