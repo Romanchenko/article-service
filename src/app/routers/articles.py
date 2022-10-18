@@ -53,5 +53,6 @@ def delete_article(id: str, token: str = Depends(oauth2_scheme)):
 
 
 @router.get("/articles", tags=["articles"], response_model=List[Article])
-def get_articles_by_field(search_request: List[SearchFieldRequest]):
+def get_articles_by_field(search_request: List[SearchFieldRequest], token: str = Depends(oauth2_scheme)):
+    user = get_user(token)
     return find_article_by_field(search_request)
