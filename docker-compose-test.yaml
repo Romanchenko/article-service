@@ -12,6 +12,7 @@ services:
       - MONGO_USER=made
       - MONGO_PASSWORD=password
       - MONGO_ADDRESS=db:27017
+      - TOKEN_EXPIRATION=3
     depends_on:
       - db
 

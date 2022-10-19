@@ -26,7 +26,8 @@ def insert_user(document: User):
 
 
 def update_user(document: User):
-    COLLECTION.update({ID_FIELD: document.id}, {"$set": document.serialize()}, upsert=False)
+    update_res = COLLECTION.update_one({ID_FIELD: document.id}, {"$set": document.serialize()}, upsert=False)
+    print(update_res.modified_count, update_res.upserted_id, update_res.matched_count)
 
 
 def delete_user(document_id: UUID):

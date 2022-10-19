@@ -2,7 +2,7 @@ version: '3'
 
 services:
   web:
-    image: apollin/article-service-v1
+    image: apollin/article-service-v1:v0.5
     command: uvicorn app.main:app --reload --workers 1 --host 0.0.0.0 --port 8000
     volumes:
       - ./src/:/usr/src/app/
@@ -12,6 +12,7 @@ services:
       - MONGO_USER=made
       - MONGO_PASSWORD=password
       - MONGO_ADDRESS=db:27017
+      - TOKEN_EXPIRATION=7200
     depends_on:
       - db
 

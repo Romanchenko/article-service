@@ -43,7 +43,7 @@ def insert_article(document: Article):
 
 
 def update_article(document: Article):
-    COLLECTION.update({ID_FIELD: document.id}, {"$set": document.serialize()}, upsert=False)
+    COLLECTION.update_one({ID_FIELD: document.id}, {"$set": document.serialize()}, upsert=False)
 
 
 def delete_article(document_id: ObjectId):
