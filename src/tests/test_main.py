@@ -1,6 +1,9 @@
 import hashlib
 
 import json
+import random
+import string
+
 from bson import ObjectId
 from dataclasses import dataclass
 
@@ -44,7 +47,7 @@ def delete(path, setup):
 @pytest.fixture
 def setup():
     db_client.drop_database(name_or_database='main')
-    login = 'test_login'
+    login = 'test_login' + random.choice(string.ascii_lowercase) + random.choice(string.ascii_lowercase)
     password = 'qerty123'
     user_response = client.post("/users", json={'login': login, 'password': password})
     token = client.post("/login?", data={'username': login, 'password': password, 'grant_type': 'password'}).json()[

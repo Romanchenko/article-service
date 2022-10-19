@@ -22,7 +22,7 @@ def insert_author(document: Author):
 
 
 def update_author(document: Author):
-    COLLECTION.update({ID_FIELD: document.id}, {"$set": document.serialize()}, upsert=False)
+    COLLECTION.update_one({ID_FIELD: document.id}, {"$set": document.serialize()}, upsert=False)
 
 
 def delete_author(document_id: ObjectId):
