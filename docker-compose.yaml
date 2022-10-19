@@ -27,5 +27,17 @@ services:
       - ./mongo_seed:/mongo_seed
       - ./mongo_seed:/docker-entrypoint-initdb.d
 
+  front:
+    image: alexcei64/streamlit_made
+    ports:
+      - '8501:8501'
+    environment:
+      - WEB_ADDRESS=web:8000
+    volumes:
+      - ./front:/app
+    depends_on:
+      - web
+      - db
+
 volumes:
-        mongodb-volume:
+  mongodb-volume:
