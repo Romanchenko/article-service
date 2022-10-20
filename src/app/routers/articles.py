@@ -1,11 +1,14 @@
 from bson import ObjectId
+from typing import List, Optional
 
 from .auth import oauth2_scheme, get_user
 from .id_info import IdInfo
 from .. import storage
 from fastapi import APIRouter, HTTPException, Depends
-from ..storage.articles_storage import find_article, insert_article
+from ..storage.articles_storage import find_article, find_article_by_field, insert_article
 from ..models.article import Article
+from ..models.search_field_request import SearchFieldRequest
+
 
 router = APIRouter()
 
@@ -41,3 +44,9 @@ def delete_article(id: str, token: str = Depends(oauth2_scheme)):
     user = get_user(token)
     id = ObjectId(id)
     storage.articles_storage.delete_article(id)
+
+
+@router.get("/articles", tags=["articles"], response_model=List[Article])
+def get_articles_by_field(search_request: List[SearchFieldRequest], token: str = Depends(oauth2_scheme)):
+    user = get_user(token)
+    return find_article_by_field(search_request)

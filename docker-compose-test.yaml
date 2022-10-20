@@ -12,6 +12,7 @@ services:
       - MONGO_USER=made
       - MONGO_PASSWORD=password
       - MONGO_ADDRESS=db:27017
+      - TOKEN_EXPIRATION=3
     depends_on:
       - db
 
@@ -27,18 +28,6 @@ services:
       - ./mongo_seed:/mongo_seed
       - ./mongo_seed:/docker-entrypoint-initdb.d
 
-  front:
-    build: ./front
-    ports:
-      - '8501:8501'
-    environment:
-      - WEB_ADDRESS=web:8000
-    volumes:
-      - ./front:/app
-    depends_on:
-      - web
-      - db
-
     healthcheck:
       test:
         [
@@ -53,6 +42,18 @@ services:
       timeout: 10s
       retries: 5
       start_period: 40s
+      
+  front:
+    build: ./front
+    ports:
+      - '8501:8501'
+    environment:
+      - WEB_ADDRESS=web:8000
+    volumes:
+      - ./front:/app
+    depends_on:
+      - web
+      - db
 
 volumes:
         mongodb-volume:
