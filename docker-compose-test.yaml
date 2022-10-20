@@ -1,4 +1,4 @@
-version: '3.4'
+version: '3.5'
 
 services:
   web:
@@ -26,6 +26,18 @@ services:
       - mongodb-volume:/data/db
       - ./mongo_seed:/mongo_seed
       - ./mongo_seed:/docker-entrypoint-initdb.d
+
+  front:
+    build: ./front
+    ports:
+      - '8501:8501'
+    environment:
+      - WEB_ADDRESS=web:8000
+    volumes:
+      - ./front:/app
+    depends_on:
+      - web
+      - db
 
     healthcheck:
       test:
