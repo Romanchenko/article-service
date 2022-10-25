@@ -6,6 +6,7 @@ import json
 import os
 import urllib
 import hashlib
+import pandas as pd
 
 
 st.set_page_config(page_title="Social_network_of_scientists", page_icon="👋",)
@@ -87,7 +88,22 @@ if LOGGED_IN == True:
     print(len(result_json))
     if st.button('Поиск') and len(result_json) > 0:
         response = requests.get(host + '/articles', json=result_json, headers=headers)
-        st.write(({article['title'] for article in response.json()}))
+        st.write(f'Найдено статей: {len(response.json())}')
+        df = pd.DataFrame(response.json())[['title', 'year', 'authors', 'keywords']]
+
+        def get_name_authors(ids_):
+            res = []
+            for id_ in ids_:
+                response = requests.get(host + '/authors/' + id_, headers=headers)
+                if response.status_code == 200:
+                    res.append(response.json()['name'])
+
+            return res
+
+        df.authors = df.authors.apply(lambda x: get_name_authors(x))
+        df.columns = ["Название статьи", "Год публикации", "Автор", "Ключивые слова"]
+        st.dataframe(df)
+
 
 
 
