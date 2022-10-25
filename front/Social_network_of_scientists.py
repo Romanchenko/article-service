@@ -101,7 +101,7 @@ if LOGGED_IN == True:
             return res
 
         df.authors = df.authors.apply(lambda x: get_name_authors(x))
-        df.columns = ["Название статьи", "Год публикации", "Автор", "Ключивые слова"]
+        df.columns = ["Название статьи", "Год публикации", "Автор", "Ключевые слова"]
         st.dataframe(df)
 
 
