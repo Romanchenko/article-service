@@ -1,7 +1,9 @@
 import streamlit as st
 from streamlit_login_auth_ui.widgets import __login__
+import streamlit_login_auth_ui
 
 import requests
+import datetime
 import json
 import os
 import urllib
@@ -44,6 +46,34 @@ if LOGGED_IN == True:
         access_token = res.json()['access_token']
     headers = {"Authorization": f"Bearer {access_token}"}
 
+    # Добавить статью
+    st.write("### Добавить статью")
+    new_article_author = st.text_input('Автор новой статьи')
+    new_article_title = st.text_input('Название новой статьи')
+    new_article_abstract = st.text_input('Описание статьи')
+    new_article_link = st.text_input('Ссылка на статью')
+
+    add_article = st.button('Добавить статью')
+    if add_article and new_article_title:
+        response = requests.post(host + "/authors", json={"name": new_article_author}, headers=headers)
+        if response.status_code == 200:
+            new_authors_id = response.json()['id']
+
+            data = {
+                "authors": [new_authors_id],
+                "abstract": new_article_abstract,
+                "title": new_article_title,
+                "url": [new_article_link],
+                "year": datetime.datetime.now().year
+            }
+
+            response = requests.post(host + "/articles", json=data, headers=headers)
+            if response.status_code == 200:
+                st.write('Статья добавлена')
+
+    elif add_article:
+        st.write("Напишите хотя бы как называется ваша статья")
+
     # Поиск статей
     st.write("### Поиск статей")
     find_article_title = st.text_input('Название статьи')
@@ -85,26 +115,45 @@ if LOGGED_IN == True:
     for i in (title_json, year_json, author_json):
         if i:
             result_json.append(i)
-    print(len(result_json))
-    if st.button('Поиск') and len(result_json) > 0:
+
+    press_find = st.button('Поиск')
+    if press_find and len(result_json) > 0:
         response = requests.get(host + '/articles', json=result_json, headers=headers)
-        st.write(f'Найдено статей: {len(response.json())}')
-        df = pd.DataFrame(response.json())[['title', 'year', 'authors', 'keywords']]
 
-        def get_name_authors(ids_):
-            res = []
-            for id_ in ids_:
-                response = requests.get(host + '/authors/' + id_, headers=headers)
-                if response.status_code == 200:
-                    res.append(response.json()['name'])
-
-            return res
-
-        df.authors = df.authors.apply(lambda x: get_name_authors(x))
-        df.columns = ["Название статьи", "Год публикации", "Автор", "Ключевые слова"]
-        st.dataframe(df)
+        n_articles = len(response.json())
 
 
+        if n_articles:
+            st.write(f'Найдено статей: {n_articles}')
+            df = pd.DataFrame(response.json())[['title', 'year', 'authors', 'keywords', 'url']]
+
+            def get_name_authors(ids_):
+                res = []
+                for id_ in ids_:
+                    response = requests.get(host + '/authors/' + id_, headers=headers)
+                    if response.status_code == 200:
+                        res.append(response.json()['name'])
+
+                return res
+
+            df.authors = df.authors.apply(lambda x: get_name_authors(x))
+            df.columns = ["Название статьи", "Год публикации", "Автор", "Ключевые слова", "Ссылка"]
+            st.dataframe(df)
+        else:
+            st.write(f'Ничего не найдено')
+
+    elif press_find:
+        st.write('Заполните любую колонку')
+
+    # Рекомендации
+    st.write("### Рекомендации")
+    rec_author = st.text_input('Введите автора для кого рекомендовать соавтора и статьи', 'John Gold')
+
+    if st.button('Рекомендовать соавтора') and rec_author:
+        st.write("Лев Толстой")
+
+    if st.button('Рекомендовать статьи') and rec_author:
+        st.write("Война и мир")
 
 
     # add articles
