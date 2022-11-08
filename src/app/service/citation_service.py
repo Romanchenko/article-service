@@ -9,6 +9,7 @@ from ..storage import citation_storage
 from ..storage.authors_storage import COLLECTION, ID_FIELD
 from ..storage.mongo_client import client
 
+
 def delete_citation_by_author(author_id: str):
     citation_storage.delete_all_by_author(ObjectId(author_id))
 
@@ -26,7 +27,9 @@ def aggregate_citations_by_word(keyword: Optional[str]):
     if keyword is not None:
         stages.append(
             {
-                '$match': {'keywords': keyword}
+                '$match': {
+                    'keywords': {'$elemMatch': {'$regex': keyword}}
+                }
             }
         )
     stages.append(
@@ -52,6 +55,9 @@ def aggregate_citations_by_word(keyword: Optional[str]):
     ARTICLES_COLLECTION.aggregate(stages)
     if keyword is None:
         keyword = UNIVERSAL_KEYWORD
+    else:
+        temp = list(client['main'][temp_collection].find({}))
+        print('temp size: {}', len(temp))
     COLLECTION.aggregate([
         {
             '$lookup': {

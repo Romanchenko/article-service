@@ -1,3 +1,5 @@
+from typing import Optional
+
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends
 
@@ -48,8 +50,10 @@ def delete_article(id: str, token: str = Depends(oauth2_scheme)):
 
 
 @router.get("/stats/authors/top", tags=["authors"], response_model=Authors)
-def get_top(count: int, token: str = Depends(oauth2_scheme)):
+def get_top(count: int, keyword: Optional[str] = None, token: str = Depends(oauth2_scheme)):
     user = get_user(token)
-    ids = citation_storage.get_top(count, UNIVERSAL_KEYWORD)
+    if keyword is None:
+        keyword = UNIVERSAL_KEYWORD
+    ids = citation_storage.get_top(count, keyword)
     authors = list(map(lambda x: storage.authors_storage.find_author(x['author']), ids))
     return Authors(authors=authors)
