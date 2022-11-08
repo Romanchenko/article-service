@@ -1,7 +1,9 @@
 from bson import ObjectId
 
+
 from ..models.author import Author
 from .mongo_client import client
+
 
 COLLECTION_NAME = 'authors'
 COLLECTION = client['main'][COLLECTION_NAME]
@@ -32,8 +34,12 @@ def delete_author(document_id: ObjectId):
 def deserialize(author_document):
     if author_document is None:
         return None
-    author_document['id'] = author_document.pop('_id')
+    author_document['id'] = author_document.pop(ID_FIELD)
     return Author.parse_obj(author_document)
+
+
+def find_all():
+    return list(map(deserialize, COLLECTION.find(filter={}, projection=[ID_FIELD])))
 
 
 def drop_database():
