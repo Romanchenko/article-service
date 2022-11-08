@@ -5,7 +5,7 @@ from ..models.citation import UNIVERSAL_KEYWORD
 from .auth import oauth2_scheme, get_user
 from .. import storage
 from ..storage.authors_storage import insert_author, find_author
-from ..service.citation_service import aggregate_citations
+from ..service.citation_service import delete_citation_by_author
 from ..models.author import Author, Authors
 from .id_info import IdInfo
 from ..storage import citation_storage
@@ -27,7 +27,6 @@ def get_author(id: str, token: str = Depends(oauth2_scheme)):
 def post_author(author: Author, token: str = Depends(oauth2_scheme)):
     user = get_user(token)
     insert_author(author)
-    aggregate_citations()
     return IdInfo(id=str(author.id))
 
 
@@ -38,15 +37,14 @@ def update_author(id: str, author: Author, token: str = Depends(oauth2_scheme)):
     if find_author(id) is None:
         raise HTTPException(status_code=404, detail="Item not found")
     storage.authors_storage.update_author(author)
-    aggregate_citations()
 
 
 @router.delete("/authors/{id}", tags=["authors"])
 def delete_article(id: str, token: str = Depends(oauth2_scheme)):
     user = get_user(token)
+    delete_citation_by_author(id)
     id = ObjectId(id)
     storage.authors_storage.delete_author(id)
-    aggregate_citations()
 
 
 @router.get("/stats/authors/top", tags=["authors"], response_model=Authors)

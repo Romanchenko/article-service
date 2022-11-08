@@ -18,6 +18,10 @@ def deserialize(citation):
     return Citation.parse_obj(citation)
 
 
+def delete_all_by_author(author_id: ObjectId):
+    COLLECTION.delete_many({'author': author_id})
+
+
 def update_score(author_id: ObjectId, score: int, keyword: str):
     print(f'author : {author_id}, keyword: {keyword}, score: {score}')
     COLLECTION.update_one({"author": author_id, "keyword": keyword}, {"$set": {"score": score}}, upsert=True)

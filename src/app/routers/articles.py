@@ -28,7 +28,7 @@ def get_article(id: str, token: str = Depends(oauth2_scheme)):
 def post_article(article: Article, token: str = Depends(oauth2_scheme)):
     user = get_user(token)
     insert_article(article)
-    aggregate_citations()
+    aggregate_citations(article.keywords)
     return IdInfo(id=str(article.id))
 
 
@@ -38,7 +38,7 @@ def update_article(id: str, article: Article, token: str = Depends(oauth2_scheme
     id = ObjectId(id)
     if find_article(id) is None:
         raise HTTPException(status_code=404, detail="Item not found")
-    aggregate_citations()
+    aggregate_citations(article.keywords)
     storage.articles_storage.update_article(article)
 
 
@@ -46,7 +46,11 @@ def update_article(id: str, article: Article, token: str = Depends(oauth2_scheme
 def delete_article(id: str, token: str = Depends(oauth2_scheme)):
     user = get_user(token)
     id = ObjectId(id)
-    aggregate_citations()
+    article = find_article(id)
+    if article is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    aggregate_citations(article.keywords)
     storage.articles_storage.delete_article(id)
 
 

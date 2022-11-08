@@ -1,3 +1,7 @@
+from typing import List, Optional
+
+from bson import ObjectId
+
 from ..models.citation import UNIVERSAL_KEYWORD
 from ..storage.articles_storage import COLLECTION as ARTICLES_COLLECTION
 from ..storage.articles_storage import COLLECTION_NAME as ARTICLES_COLLECTION_NAME
@@ -5,27 +9,49 @@ from ..storage import citation_storage
 from ..storage.authors_storage import COLLECTION, ID_FIELD
 from ..storage.mongo_client import client
 
+def delete_citation_by_author(author_id: str):
+    citation_storage.delete_all_by_author(ObjectId(author_id))
 
-def aggregate_citations():
+
+def aggregate_citations(keywords: List[str]):
+    keywords.append(None)
+    for keyword in keywords:
+        aggregate_citations_by_word(keyword)
+
+
+def aggregate_citations_by_word(keyword: Optional[str]):
     temp_collection = 'temp'
     results_collection = 'results'
-    ARTICLES_COLLECTION.aggregate([
+    stages = []
+    if keyword is not None:
+        stages.append(
+            {
+                '$match': {'keywords': keyword}
+            }
+        )
+    stages.append(
         {
             '$unwind': '$references'
-        },
+        }
+    )
+    stages.append(
         {
             '$group': {
                 '_id': "$references",
                 'count': {'$count': {}}
             }
-        },
+        }
+    )
+    stages.append(
         {
             '$out': {
                 'db': 'main', 'coll': temp_collection
             }
         }
-    ])
-    temp_res = client['main'][temp_collection].find({})
+    )
+    ARTICLES_COLLECTION.aggregate(stages)
+    if keyword is None:
+        keyword = UNIVERSAL_KEYWORD
     COLLECTION.aggregate([
         {
             '$lookup': {
@@ -55,7 +81,7 @@ def aggregate_citations():
         author_id = result_doc['_id']
         if 'citations' in result_doc:
             citations = sum(list(map(lambda x: x['count'], result_doc['citations'])))
-            citation_storage.update_score(author_id, citations, UNIVERSAL_KEYWORD)
+            citation_storage.update_score(author_id, citations, keyword)
 
     client['main'].drop_collection(temp_collection)
     client['main'].drop_collection(results_collection)
