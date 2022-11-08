@@ -19,6 +19,14 @@ def find_article(document_id: ObjectId):
     return deserialize(COLLECTION.find_one({ID_FIELD: document_id}))
 
 
+def find_article_by_citation(author_id: ObjectId) -> int:
+    return COLLECTION.count_documents({'references': author_id})
+
+
+def find_article_by_citation(author_id: ObjectId, keyword: str) -> int:
+    return COLLECTION.count_documents({'references': author_id, 'keywords': keyword})
+
+
 def find_article_by_field(search_request: List[SearchFieldRequest]):
     search_request.sort(key=lambda x: x['field'])
     expr = {'$and': []}
