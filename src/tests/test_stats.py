@@ -1,4 +1,5 @@
 from .test_main import setup, TestData, post, get
+from app.service.citation_service import aggregate_citations
 
 
 def test_get_top(setup):
@@ -42,7 +43,7 @@ def test_get_top(setup):
         'references': [article_id_1, article_id_3, article_id_2]
     }, setup=setup)
     sz = 2
-
+    aggregate_citations([])
     top_authors = get(f"/stats/authors/top?count={sz}", setup)
     assert len(top_authors.json()['authors']) == 2
     authors = top_authors.json()['authors']
@@ -50,7 +51,6 @@ def test_get_top(setup):
     assert authors[0]['name'] == 'Ivan Ivanov'
     assert authors[1]['_id'] == id2
     assert authors[1]['name'] == 'Ivan Smirnov'
-
 
 # def test_top_by_keyword(setup):
 #     response = post("/authors", json={'name': 'Ivan Ivanov'}, setup=setup)
@@ -110,4 +110,3 @@ def test_get_top(setup):
 #     assert authors[1]['_id'] == id3
 #     assert authors[1]['name'] == 'Nikolay Tikhonov'
 #
-

@@ -16,6 +16,17 @@ services:
     depends_on:
       - db
 
+  cron:
+    image: apollin/article-service-v1:v0.5
+    command: python -m app.refresh_stats
+    environment:
+      - MONGO_USER=made
+      - MONGO_PASSWORD=password
+      - MONGO_ADDRESS=db:27017
+      - TOKEN_EXPIRATION=7200
+    depends_on:
+      - db
+
   db:
     image: mongo:5.0
 
