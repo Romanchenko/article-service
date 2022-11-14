@@ -20,7 +20,9 @@ services:
       - db
 
   cron:
-    build: ./src
+    build:
+      context: ./src
+      dockerfile: DockerfileTest
     command: python -m app.refresh_stats
     environment:
       - MONGO_USER=made
