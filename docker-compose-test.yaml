@@ -2,7 +2,10 @@ version: '3.5'
 
 services:
   web:
-    build: ./src
+    build:
+      context: ./src
+      dockerfile: DockerfileTest
+
     command: uvicorn app.main:app --reload --workers 1 --host 0.0.0.0 --port 8000
     volumes:
       - ./src/:/usr/src/app/
