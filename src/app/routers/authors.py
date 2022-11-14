@@ -1,11 +1,16 @@
+from typing import Optional
+
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends
 
+from ..models.citation import UNIVERSAL_KEYWORD
 from .auth import oauth2_scheme, get_user
 from .. import storage
 from ..storage.authors_storage import insert_author, find_author
-from ..models.author import Author
+from ..service.citation_service import delete_citation_by_author
+from ..models.author import Author, Authors
 from .id_info import IdInfo
+from ..storage import citation_storage
 
 router = APIRouter()
 
@@ -39,5 +44,16 @@ def update_author(id: str, author: Author, token: str = Depends(oauth2_scheme)):
 @router.delete("/authors/{id}", tags=["authors"])
 def delete_article(id: str, token: str = Depends(oauth2_scheme)):
     user = get_user(token)
+    delete_citation_by_author(id)
     id = ObjectId(id)
     storage.authors_storage.delete_author(id)
+
+
+@router.get("/stats/authors/top", tags=["authors"], response_model=Authors)
+def get_top(count: int, keyword: Optional[str] = None, token: str = Depends(oauth2_scheme)):
+    user = get_user(token)
+    if keyword is None:
+        keyword = UNIVERSAL_KEYWORD
+    ids = citation_storage.get_top(count, keyword)
+    authors = list(map(lambda x: storage.authors_storage.find_author(x['author']), ids))
+    return Authors(authors=authors)

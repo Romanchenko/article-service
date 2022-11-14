@@ -1,6 +1,6 @@
 from datetime import datetime
 from copy import deepcopy
-from typing import Dict
+from typing import Dict, List
 
 from bson import ObjectId
 from pydantic import BaseModel, Field
@@ -18,6 +18,15 @@ class Author(BaseModel):
         d = deepcopy(self.__dict__)
         d['_id'] = d.pop('id')
         return d
+
+    class Config:
+        arbitrary_types_allowed = True
+        allow_population_by_field_name = True
+        json_encoders = {ObjectId: str}
+
+
+class Authors(BaseModel):
+    authors: List[Author]
 
     class Config:
         arbitrary_types_allowed = True

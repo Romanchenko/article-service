@@ -10,7 +10,7 @@ import hashlib
 import pandas as pd
 
 
-HOST = f"http://{os.getenv('WEB_ADDRESS', 'localHOST:8002')}"
+HOST = f"http://{os.getenv('WEB_ADDRESS', 'localhost:8002')}"
 
 st.set_page_config(page_title="Social_network_of_scientists", page_icon="👋",)
 
@@ -48,7 +48,7 @@ def check_connect():
     return content.status_code == 200
 
 
-def registragion(login, password):
+def registration(login, password):
     password_hash = hashlib.md5(password.encode('utf-8')).hexdigest()
     data = {"login": login, "password_hash": password_hash}
     requests.post(url=HOST + '/users', json=data)
@@ -63,7 +63,7 @@ def authorization(login, password):
     if res.status_code == 200 and 'access_token' in res.json():
         access_token = res.json()['access_token']
     else:
-        registragion(login, password)
+        registration(login, password)
         authorization(login, password)
 
     return access_token
@@ -174,7 +174,10 @@ def make_recommendation():
     rec_author = st.text_input('Введите автора для кого рекомендовать соавтора и статьи', login)
 
     if st.button('Рекомендовать соавтора') and rec_author:
-        st.write("George Orwell")
+        response = requests.get(HOST + "/stats/authors/top/?count=8", headers=headers)
+        if response.status_code == 200:
+            for auth in response.json()['authors']:
+                st.write(auth['name'])
 
     if st.button('Рекомендовать статьи') and rec_author:
         st.write("1984")
