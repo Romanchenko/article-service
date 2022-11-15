@@ -20,4 +20,4 @@ RUN set -eux \
     && rm -rf /root/.cache/pip
 
 # copy project
-ADD app /usr/src/app/src/app
+ADD app /usr/src/app/app
