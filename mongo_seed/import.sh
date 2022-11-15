@@ -14,3 +14,13 @@ echo "data imported"
 echo "Doing other useful mongodb database stuff, e.g creating additional mongo users..."
 
 echo "Mongo users created."
+
+mongosh mongodb://made_user:password2@127.0.0.1:27017
+db.articles.find().forEach( function(myDoc) {
+  const newRefs = [];
+  if (myDoc.references !== undefined) {
+    myDoc.references.forEach(r => newRefs.push(ObjectId(r)));
+    db.articles.updateOne({_id: myDoc._id}, {$set:{"references": newRefs}})
+  }
+});
+

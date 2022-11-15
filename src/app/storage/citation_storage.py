@@ -22,6 +22,13 @@ def delete_all_by_author(author_id: ObjectId):
     COLLECTION.delete_many({'author': author_id})
 
 
+def get_all_keywords():
+    return set(map(
+        lambda x: x['keyword'],
+        COLLECTION.find({}, projection={ID_FIELD: False, "keyword": True})
+    ))
+
+
 def update_score(author_id: ObjectId, score: int, keyword: str):
     print(f'author : {author_id}, keyword: {keyword}, score: {score}')
     COLLECTION.update_one({"author": author_id, "keyword": keyword}, {"$set": {"score": score}}, upsert=True)

@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Set
 
 from bson import ObjectId
 
@@ -12,6 +12,13 @@ from ..storage.mongo_client import client
 
 def delete_citation_by_author(author_id: str):
     citation_storage.delete_all_by_author(ObjectId(author_id))
+
+
+def get_all_keyword() -> Set:
+    keywords = citation_storage.get_all_keywords()
+    if UNIVERSAL_KEYWORD in keywords:
+        keywords.remove(UNIVERSAL_KEYWORD)
+    return keywords
 
 
 def aggregate_citations(keywords: List[str]):
