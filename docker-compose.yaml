@@ -2,10 +2,8 @@ version: '3'
 
 services:
   web:
-    image: apollin/article-service-v1:v0.7
+    image: apollin/article-service-v1:v0.9.2
     command: uvicorn app.main:app --reload --workers 1 --host 0.0.0.0 --port 8000
-    volumes:
-      - ./src/:/usr/src/app/
     ports:
       - '8002:8000'
     environment:
@@ -17,7 +15,7 @@ services:
       - db
 
   cron:
-    image: apollin/article-service-v1:v0.7
+    image: apollin/article-service-v1:v0.9.2
     command: python -m app.refresh_stats
     environment:
       - MONGO_USER=made
@@ -38,7 +36,7 @@ services:
       - mongodb-volume:/data/db
       - ./mongo_seed:/mongo_seed
       - ./mongo_seed:/docker-entrypoint-initdb.d
-      
+
   front:
     image: alexcei64/streamlit_made
     ports:
@@ -46,7 +44,7 @@ services:
     environment:
       - WEB_ADDRESS=web:8000
     volumes:
-      - ./front:/app
+      - /front:/app
     depends_on:
       - web
       - db
