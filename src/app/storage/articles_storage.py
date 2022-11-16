@@ -63,3 +63,14 @@ def deserialize(article_document):
         return None
     article_document['id'] = article_document.pop('_id')
     return Article.parse_obj(article_document)
+
+
+def update_tag(article_id, tag):
+    COLLECTION.update_one({ID_FIELD: article_id}, update={'$set': {"tag": tag}})
+
+
+def get_all_cursor():
+    return COLLECTION.find(
+        {'abstract': {'$exists': True}},
+        projection={ID_FIELD: 1, 'abstract': 1}
+    )

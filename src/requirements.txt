@@ -7,3 +7,7 @@ requests==2.28.1
 python-multipart==0.0.5
 python-crontab==2.6.0
 schedule==1.1.0
+bertopic==0.12.0
+tqdm==4.64.1
+nltk==3.7
+spacy==3.4.2
