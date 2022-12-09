@@ -28,14 +28,14 @@ def update_stats():
 def calculate_model():
     log.info("Starting score update")
     start_ts = time.time()
-    update_scores()
+    update_scores(log)
     end_ts = time.time()
     log.info("Finished scores update in %d s", end_ts - start_ts)
 
 
 if __name__ == '__main__':
     schedule.every(3).hours.do(update_stats)
-    schedule.every(3).hours.do(calculate_model())
+    schedule.every(10).minutes.do(calculate_model())
     while 1:
         schedule.run_pending()
         time.sleep(1)
