@@ -13,7 +13,7 @@ def score_data(model, logger):
         topics, prob = model.transform(preprocessed_abstract)
         if len(topics) > 0:
             logger.info(f"Will update {article_id} article with topic {topics_dict[topics[0]]}")
-            # update_tag(article_id, tag=topics_dict[topics[0]])
+            update_tag(article_id, tag=topics_dict[topics[0]])
         else:
             logger.info(f"Empty topics for article {article_id}")
 
