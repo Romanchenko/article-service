@@ -1,5 +1,5 @@
 from tqdm import tqdm
-from text_preprocess import text_preprocessing
+from .text_preprocess import text_preprocessing
 from bertopic import BERTopic
 from ..storage.articles_storage import get_all_cursor, update_tag
 
