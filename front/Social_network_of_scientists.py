@@ -148,7 +148,7 @@ def find_article():
 
         if n_articles:
             st.write(f'Найдено статей: {n_articles}')
-            df = pd.DataFrame(response.json())[['title', 'year', 'authors', 'keywords', 'url']]
+            df = pd.DataFrame(response.json())[['title', 'year', 'authors', 'keywords', 'url', 'tag']]
 
             def get_name_authors(ids_):
                 res = []
