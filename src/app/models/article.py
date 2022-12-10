@@ -34,6 +34,7 @@ class Article(BaseModel):
     url: List[str] = []
     venue_id: PyObjectId = None
     venue_name: str = None
+    tag: str = None
 
     def serialize(self) -> Dict:
         d = deepcopy(self.__dict__)

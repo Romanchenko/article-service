@@ -4,57 +4,38 @@ import logging.config
 from .service.citation_service import get_all_keyword, aggregate_citations
 import logging
 
-log_conf = {
-    "version": 1,
-    "formatters": {
-        "file_formatter": {
-            "format": "%(asctime)s\t%(levelname)s\t%(message)s",
-        },
-        "stdout_formatter": {
-            "format": "%(asctime)s\t%(levelname)s\t%(funcName)s\t%(message)s",
-        },
-    },
-    "handlers": {
-        "file_handler": {
-            "class": "logging.FileHandler",
-            "level": "DEBUG",
-            "filename": "cron.log",
-            "formatter": "file_formatter",
-        },
-        "stream_handler": {
-            "level": "DEBUG",
-            "formatter": "stdout_formatter",
-            "class": "logging.StreamHandler",
-        },
-    },
-    "loggers": {
-        "": {
-            "level": "DEBUG",
-            "handlers": ["file_handler", "stream_handler"],
-        }
-    }
-}
+from .service.general_logging import get_logging_conf
+from .service.score_data import update_scores
 
-logging.config.dictConfig(log_conf)
+logging.config.dictConfig(get_logging_conf('cron.log'))
 log = logging.getLogger(__name__)
 
 
-def job():
+def update_stats():
     start_ts = time.time()
     keywords = get_all_keyword()
     log.info("Got %s keywords", len(keywords))
     end_ts = time.time()
-    log.info(f"Finished search of keywords in {end_ts - start_ts}ms")
+    log.info(f"Finished search of keywords in {end_ts - start_ts}s")
 
     log.info("Starting aggregation")
     start_ts = time.time()
     aggregate_citations(list(keywords))
     end_ts = time.time()
-    log.info("Finished aggregation in %d ms", end_ts - start_ts)
+    log.info("Finished aggregation in %d s", end_ts - start_ts)
+
+
+def calculate_model():
+    log.info("Starting score update")
+    start_ts = time.time()
+    update_scores(log)
+    end_ts = time.time()
+    log.info("Finished scores update in %d s", end_ts - start_ts)
 
 
 if __name__ == '__main__':
-    schedule.every(3).hours.do(job)
+    schedule.every(3).hours.do(update_stats)
+    schedule.every(10).minutes.do(calculate_model())
     while 1:
         schedule.run_pending()
         time.sleep(1)
