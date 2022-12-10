@@ -22,7 +22,7 @@ RUN pip install python-dev-tools --upgrade
 RUN pip install --upgrade pip setuptools wheel \
     && pip install -r /usr/src/app/requirements.txt \
     && rm -rf /root/.cache/pip
-
-
+RUN python -m nltk.downloader stopwords
+RUN python -m spacy download en_core_web_sm
 # copy project
 ADD app /usr/src/app/app
