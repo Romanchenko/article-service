@@ -43,7 +43,9 @@ class TopicModeling:
 def score_data(logger):
     global model_runner
     if model_runner is None:
-        model_runner = TopicModeling('/models/topic_modeling_pipeline.pkl')
+        with open('/models/topic_modeling_pipeline.pkl', "rb") as f:
+            model_runner = pickle.load(f)
+        # model_runner = TopicModeling('/models/topic_modeling_pipeline.pkl')
     for article in tqdm(get_all_cursor()):
         abstract = article['abstract']
         article_id = article['_id']
