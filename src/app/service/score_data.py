@@ -7,27 +7,27 @@ import re
 import spacy
 from nltk.corpus import stopwords
 
-
+model_runner = None
 class TopicModeling:
 
     def __init__(self, path_to_model: str):
         self.bert_model = BERTopic.load(path_to_model)
         self.topic_dict = dict(zip(self.bert_model.get_topic_info()['Topic'],
                                    self.bert_model.get_topic_info()['Name']))
+        self.nlp = spacy.load('en_core_web_sm')
 
     def text_preprocessing(self, text):
         if isinstance(text, str):
             text = [text]
         for idx, txt in enumerate(text):
             regex = re.compile('[A-Za-z]+')
-            nlp = spacy.load('en_core_web_sm')
             mystopwords = stopwords.words('english') + ['paper', 'result', 'experiment', 'from', 'subject',
                                                         're', 'edu', 'use', 'data', 'method', 'based',
                                                         'new', 'approach', 'also', 'system', 'model',
                                                         'present', 'research', 'propose', 'base']
 
             text[idx] = ' '.join(regex.findall(txt))
-            doc = nlp(txt)
+            doc = self.nlp(txt)
             text[idx] = ' '.join([token.lemma_ for token in doc])
             text[idx] = ' '.join([token for token in txt.split() if not token in mystopwords])
 
@@ -41,7 +41,9 @@ class TopicModeling:
         return topics
 
 def score_data(logger):
-    model_runner = TopicModeling('/models/topic_modeling_pipeline.pkl')
+    global model_runner
+    if model_runner is None:
+        model_runner = TopicModeling('/models/topic_modeling_pipeline.pkl')
     for article in tqdm(get_all_cursor()):
         abstract = article['abstract']
         article_id = article['_id']
@@ -54,6 +56,5 @@ def score_data(logger):
 
 
 def update_scores(logger):
-    # model = BERTopic.load('/models/topic_modeling_pipeline.pkl')
     score_data(logger)
 
