@@ -8,13 +8,13 @@ import spacy
 from nltk.corpus import stopwords
 
 model_runner = None
+nlp = spacy.load('en_core_web_sm')
 class TopicModeling:
 
     def __init__(self, path_to_model: str):
         self.bert_model = BERTopic.load(path_to_model)
         self.topic_dict = dict(zip(self.bert_model.get_topic_info()['Topic'],
                                    self.bert_model.get_topic_info()['Name']))
-        self.nlp = spacy.load('en_core_web_sm')
 
     def text_preprocessing(self, text):
         if isinstance(text, str):
@@ -27,7 +27,7 @@ class TopicModeling:
                                                         'present', 'research', 'propose', 'base']
 
             text[idx] = ' '.join(regex.findall(txt))
-            doc = self.nlp(txt)
+            doc = nlp(txt)
             text[idx] = ' '.join([token.lemma_ for token in doc])
             text[idx] = ' '.join([token for token in txt.split() if not token in mystopwords])
 
