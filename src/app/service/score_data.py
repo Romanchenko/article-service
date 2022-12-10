@@ -9,7 +9,7 @@ def score_data(model, logger):
     for article in tqdm(get_all_cursor()):
         abstract = article['abstract']
         article_id = article['_id']
-        preprocessed_abstract = text_preprocessing(abstract[1])
+        preprocessed_abstract = text_preprocessing(abstract)
         topics, prob = model.transform(preprocessed_abstract)
         if len(topics) > 0:
             logger.info(f"Will update {article_id} article with topic {topics_dict[topics[0]]}")
