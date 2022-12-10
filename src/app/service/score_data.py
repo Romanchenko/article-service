@@ -8,7 +8,9 @@ import spacy
 from nltk.corpus import stopwords
 
 model_runner = None
-nlp = spacy.load('en_core_web_sm')
+# nlp = spacy.load('en_core_web_sm')
+
+
 class TopicModeling:
 
     def __init__(self, path_to_model: str):
@@ -21,6 +23,7 @@ class TopicModeling:
             text = [text]
         for idx, txt in enumerate(text):
             regex = re.compile('[A-Za-z]+')
+            nlp = spacy.load('en_core_web_sm')
             mystopwords = stopwords.words('english') + ['paper', 'result', 'experiment', 'from', 'subject',
                                                         're', 'edu', 'use', 'data', 'method', 'based',
                                                         'new', 'approach', 'also', 'system', 'model',
