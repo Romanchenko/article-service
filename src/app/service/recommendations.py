@@ -2,7 +2,7 @@ import logging.config
 import pickle
 from collections import defaultdict, Counter
 from .model_inf import TopicModeling
-from ..storage.articles_storage import get_all_cursor, get_all_cursor_authors
+from ..storage.articles_storage import get_all_cursor_authors
 from .general_logging import get_logging_conf
 
 logging.config.dictConfig(get_logging_conf('recs.log'))
