@@ -74,3 +74,10 @@ def get_all_cursor():
         {'abstract': {'$exists': True}},
         projection={ID_FIELD: 1, 'abstract': 1}
     )
+
+
+def get_all_cursor_authors():
+    return COLLECTION.find(
+        {'authors': {'$exists': True}, 'tag': {'$exists': True}},
+        projection={ID_FIELD: 1, 'authors': 1, 'tag': 1}
+    )

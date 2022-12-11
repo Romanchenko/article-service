@@ -1,14 +1,14 @@
 import pickle
 from collections import defaultdict, Counter
 from .model_inf import TopicModeling
-from ..storage.articles_storage import get_all_cursor
+from ..storage.articles_storage import get_all_cursor, get_all_cursor_authors
 
 
 def count_clusters(logger):
     klusters_top = defaultdict(dict)
     collabs = defaultdict(set)
 
-    for document in get_all_cursor():
+    for document in get_all_cursor_authors():
         authors = document['authors']
         label = document['tag']
         for author in authors:
