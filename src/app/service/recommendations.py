@@ -3,24 +3,32 @@ from collections import defaultdict, Counter
 from .model_inf import TopicModeling
 from ..storage.articles_storage import get_all_cursor, get_all_cursor_authors
 
+COLLABS_FILE = "/models/collabs.pkl"
+CLUSTER_TOP = "/models/klusters_top.pkl"
+
+rs = None
+
 
 def count_clusters(logger):
     klusters_top = defaultdict(dict)
     collabs = defaultdict(set)
 
     for document in get_all_cursor_authors():
+        doc_id = document["_id"]
+        logger.info(f"Lookup document {doc_id}")
         authors = document['authors']
         label = document['tag']
         for author in authors:
             if author != "":
                 if author in klusters_top[label]:
-                    klusters_top[label][author] += 1
+                    klusters_top[label][str(author)] += 1
                 else:
-                    klusters_top[label][author] = 1
+                    klusters_top[label][str(author)] = 1
         for author1 in authors:
             for author2 in authors:
                 if author1 != author2:
-                    collabs[author1].add(author2)
+                    logger.info(f"Added link {author1} -> {author2}")
+                    collabs[str(author1)].add(str(author2))
 
     logger.info(f"Finished scanning documents")
     klusters_top_sorted = {}
@@ -43,7 +51,7 @@ def count_clusters(logger):
     logger.info(f"Dumped dict with {len(klusters_top_sorted)} labels")
 
 
-class Recommendation_system:
+class RecommendationSystem:
 
     def __init__(self, model_path, train_dct_of_links, klusters_top):
         self.model = TopicModeling(model_path)
@@ -135,3 +143,15 @@ class Recommendation_system:
 
             self.add_recommendations_from_top(all_recommendation, top)
             return all_recommendation
+
+
+def recommend(author_id, top=10):
+    if top is None:
+        top = 10
+    global rs
+    if rs is None:
+        with open(CLUSTER_TOP, "rb") as clusters_top_file, open(COLLABS_FILE, "rb") as collabs_file:
+            clusters = pickle.load(clusters_top_file)
+            collabs = pickle.load(collabs_file)
+            rs = RecommendationSystem('/models/bert_model_100k', collabs, clusters)
+    recs = rs.get_recommendation(author_id=author_id, top=top)

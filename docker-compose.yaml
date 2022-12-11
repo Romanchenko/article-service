@@ -13,7 +13,8 @@ services:
       - TOKEN_EXPIRATION=7200
     depends_on:
       - db
-
+    volumes:
+      - /models:/models
 
   cron:
     image: apollin/article-service-v1:v0.9.2
