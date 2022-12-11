@@ -170,4 +170,5 @@ def recommend(author_id, top=10):
             collabs = pickle.load(collabs_file)
             rs = RecommendationSystem('/models/bert_model_100k', collabs, clusters)
     recs = rs.get_recommendation(author_id=author_id, top=top)
+    recs = list(filter(lambda x: x != '', recs))
     return recs
