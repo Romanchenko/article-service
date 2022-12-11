@@ -179,8 +179,8 @@ def make_recommendation():
         if author_json.status_code != 200:
             st.write(f"Author {rec_author} not found")
         else:
-            author_id = author_json.json()["id"]
-            response = requests.get(HOST + f"/stats/authors/rec/?count=10&id={author_id}", headers=headers)
+            author_id = author_json.json()["_id"]
+            response = requests.get(HOST + f"/stats/authors/rec/?count=10&author_id={author_id}", headers=headers)
             if response.status_code == 200:
                 for auth in response.json()['authors']:
                     st.write(auth['name'])
