@@ -1,7 +1,12 @@
+import logging.config
 import pickle
 from collections import defaultdict, Counter
 from .model_inf import TopicModeling
 from ..storage.articles_storage import get_all_cursor, get_all_cursor_authors
+from .general_logging import get_logging_conf
+
+logging.config.dictConfig(get_logging_conf('recs.log'))
+log = logging.getLogger(__name__)
 
 COLLABS_FILE = "/models/collabs.pkl"
 CLUSTER_TOP = "/models/klusters_top.pkl"
@@ -41,12 +46,12 @@ def count_clusters(logger):
         collabs_list[author] = list(coauthors)
 
     logger.info(f"Start dumping dict with {len(collabs_list)} authors")
-    with open("/models/collabs.pkl", "wb") as file:
+    with open(COLLABS_FILE, "wb") as file:
         pickle.dump(collabs_list, file)
     logger.info(f"Dumped dict with {len(collabs_list)} authors")
 
     logger.info(f"Start dumping dict with {len(klusters_top_sorted)} labels")
-    with open("/models/klusters_top.pkl", "wb") as file:
+    with open(CLUSTER_TOP, "wb") as file:
         pickle.dump(klusters_top_sorted, file)
     logger.info(f"Dumped dict with {len(klusters_top_sorted)} labels")
 
@@ -59,13 +64,22 @@ class RecommendationSystem:
         self.klusters_top = klusters_top
         self.top_authors = self.get_top_authors()
 
+    def try_refresh(self):
+        if len(self.klusters_top) == 0 or len(self.train_dct_of_links) == 0:
+            with open(CLUSTER_TOP, 'rb') as file:
+                self.klusters_top = pickle.load(file)
+            with open(COLLABS_FILE, 'rb') as file:
+                self.train_dct_of_links = pickle.load(file)
+            self.top_authors = self.get_top_authors()
+
     def get_top_authors(self, top=1000):
         authors_by_collaborators = [(author, len(collaborators)) for author, collaborators in
                                     self.train_dct_of_links.items()]
         authors_by_collaborators.sort(key=lambda x: -x[1])  # fixed sort order
 
+        log.info(f"Get top authors length: {len(authors_by_collaborators)}")
         out = [None] * top
-        for i in range(top):
+        for i in range(min(top, len(authors_by_collaborators))):
             out[i] = authors_by_collaborators[i][0]
 
         return out
@@ -120,6 +134,7 @@ class RecommendationSystem:
         return out
 
     def get_recommendation(self, top=10, author_id=None, lst_of_articles=None):
+        self.try_refresh()
         if (author_id is None) or (author_id not in self.train_dct_of_links):
             if lst_of_articles is None:
                 return self.top_authors[-top:]
