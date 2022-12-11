@@ -5,10 +5,6 @@ from time import sleep
 
 from .model_inf import TopicModeling
 from ..storage.articles_storage import get_all_cursor_authors
-from .general_logging import get_logging_conf
-
-logging.config.dictConfig(get_logging_conf('recs.log'))
-log = logging.getLogger(__name__)
 
 COLLABS_FILE = "/models/collabs.pkl"
 CLUSTER_TOP = "/models/klusters_top.pkl"
@@ -80,7 +76,7 @@ class RecommendationSystem:
                                     self.train_dct_of_links.items()]
         authors_by_collaborators.sort(key=lambda x: -x[1])  # fixed sort order
 
-        log.info(f"Get top authors length: {len(authors_by_collaborators)}")
+        print(f"Get top authors length: {len(authors_by_collaborators)}")
         out = []
         for i in range(min(top, len(authors_by_collaborators))):
             out.append(authors_by_collaborators[i][0])
@@ -138,7 +134,7 @@ class RecommendationSystem:
     def get_recommendation(self, top=10, author_id=None, lst_of_articles=None):
         self.try_refresh()
         if (author_id is None) or (author_id not in self.train_dct_of_links):
-            log.info("Will go in first branch")
+            print("Will go in first branch")
             if lst_of_articles is None:
                 return self.top_authors[:top]
 
@@ -148,7 +144,7 @@ class RecommendationSystem:
             return out
 
         else:
-            log.info("Will go in second branch")
+            print("Will go in second branch")
             all_recommendation = set()
             first_layer = self.train_dct_of_links[author_id]
 
