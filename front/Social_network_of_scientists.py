@@ -174,10 +174,16 @@ def make_recommendation():
     rec_author = st.text_input('Введите автора для кого рекомендовать соавтора и статьи', login)
 
     if st.button('Рекомендовать соавтора') and rec_author:
-        response = requests.get(HOST + "/stats/authors/top/?count=8", headers=headers)
-        if response.status_code == 200:
-            for auth in response.json()['authors']:
-                st.write(auth['name'])
+        # response = requests.get(HOST + "/stats/authors/top/?count=8", headers=headers)
+        author_json = requests.get(HOST + f"/author?name={rec_author}", headers=headers)
+        if author_json.status_code != 200:
+            st.write(f"Author {rec_author} not found")
+        else:
+            author_id = author_json.json()["_id"]
+            response = requests.get(HOST + f"/stats/authors/rec/?count=10&author_id={author_id}", headers=headers)
+            if response.status_code == 200:
+                for auth in response.json()['authors']:
+                    st.write(auth['name'])
 
     if st.button('Рекомендовать статьи') and rec_author:
         st.write("1984")

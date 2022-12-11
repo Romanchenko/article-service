@@ -6,8 +6,9 @@ from fastapi import APIRouter, HTTPException, Depends
 from ..models.citation import UNIVERSAL_KEYWORD
 from .auth import oauth2_scheme, get_user
 from .. import storage
-from ..storage.authors_storage import insert_author, find_author
+from ..storage.authors_storage import insert_author, find_author, find_whole_authors_by_name
 from ..service.citation_service import delete_citation_by_author
+from ..service.recommendations import recommend
 from ..models.author import Author, Authors
 from .id_info import IdInfo
 from ..storage import citation_storage
@@ -23,6 +24,14 @@ def get_author(id: str, token: str = Depends(oauth2_scheme)):
     if result is None:
         raise HTTPException(status_code=404, detail="Item not found")
     return result
+
+@router.get("/author", tags=["authors"], response_model=Author)
+def get_author(name: str, token: str = Depends(oauth2_scheme)):
+    user = get_user(token)
+    result = find_whole_authors_by_name(name, full_math=True)
+    if len(result) == 0:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return result[0]
 
 
 @router.post("/authors", tags=["authors"], response_model=IdInfo)
@@ -56,4 +65,12 @@ def get_top(count: int, keyword: Optional[str] = None, token: str = Depends(oaut
         keyword = UNIVERSAL_KEYWORD
     ids = citation_storage.get_top(count, keyword)
     authors = list(map(lambda x: storage.authors_storage.find_author(x['author']), ids))
+    return Authors(authors=authors)
+
+
+@router.get("/stats/authors/rec", tags=["authors"], response_model=Authors)
+def get_top(author_id: str, count: Optional[int], token: str = Depends(oauth2_scheme)):
+    user = get_user(token)
+    recs = recommend(author_id, top=count)
+    authors = list(map(lambda x: storage.authors_storage.find_author(ObjectId(x)), recs))
     return Authors(authors=authors)
