@@ -6,7 +6,7 @@ echo "start importing data"
 # db_to_feed needs to be defined
 # mongorestore -u mongoadmin -p mypass --authenticationDatabase admin -d db_to_feed ./mongo-seed-data
 # e.g.
-mongoimport --host 127.0.0.1:27017 --db main --collection articles --type json --file /mongo_seed/mongo_seed/data/articles.json --jsonArray -u made_user -p password2 --authenticationDatabase=admin
+mongoimport --host 127.0.0.1:27017 --db main --collection articles --type json --file /articles2.json --jsonArray --mode=upsert -u made_user -p password2 --authenticationDatabase=admin
 mongoimport --host 127.0.0.1:27017 --db main --collection authors --type json --file /mongo_seed/mongo_seed/data/authors.json --jsonArray -u made_user -p password2 --authenticationDatabase=admin
 echo "data imported"
 
