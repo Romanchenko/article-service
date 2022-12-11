@@ -15,7 +15,7 @@ def score_data(logger):
         topics = model_runner.score_text(abstract)
         if len(topics) > 0:
             logger.info(f"Will update {article_id} article with topic {topics[0]}")
-            # update_tag(article_id, tag=topics_dict[topics[0]])
+            update_tag(article_id, tag=topics[0])
         else:
             logger.info(f"Empty topics for article {article_id}")
 

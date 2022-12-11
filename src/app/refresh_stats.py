@@ -35,7 +35,7 @@ def calculate_model():
 
 if __name__ == '__main__':
     schedule.every(3).hours.do(update_stats)
-    schedule.every(10).minutes.do(calculate_model())
+    schedule.every(1).hours.do(calculate_model())
     while 1:
         schedule.run_pending()
         time.sleep(1)
