@@ -25,7 +25,7 @@ def get_author(id: str, token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=404, detail="Item not found")
     return result
 
-@router.get("/authors/find", tags=["authors"], response_model=Author)
+@router.get("/author", tags=["authors"], response_model=Author)
 def get_author(name: str, token: str = Depends(oauth2_scheme)):
     user = get_user(token)
     result = find_authors_by_name(name, full_math=True)
