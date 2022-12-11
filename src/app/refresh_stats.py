@@ -42,7 +42,7 @@ def calculate_top_authors_and_collaborators():
 
 
 if __name__ == '__main__':
-    schedule.every(4).minutes.do(calculate_top_authors_and_collaborators)
+    schedule.every(2).hours.do(calculate_top_authors_and_collaborators)
     schedule.every(3).hours.do(update_stats)
     schedule.every(1).hours.do(calculate_model)
     while 1:
