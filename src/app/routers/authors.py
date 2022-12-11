@@ -64,5 +64,5 @@ def get_top(count: int, keyword: Optional[str] = None, token: str = Depends(oaut
 def get_top(author_id: str, count: Optional[int], token: str = Depends(oauth2_scheme)):
     user = get_user(token)
     recs = recommend(author_id, top=count)
-    authors = list(map(lambda x: storage.authors_storage.find_author(x['author']), recs))
+    authors = list(map(lambda x: storage.authors_storage.find_author(ObjectId(x)), recs))
     return Authors(authors=authors)

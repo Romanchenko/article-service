@@ -175,6 +175,7 @@ def make_recommendation():
 
     if st.button('Рекомендовать соавтора') and rec_author:
         response = requests.get(HOST + "/stats/authors/top/?count=8", headers=headers)
+        response = requests.get(HOST + f"/stats/authors/rec/?count=10&name={rec_author}", headers=headers)
         if response.status_code == 200:
             for auth in response.json()['authors']:
                 st.write(auth['name'])
