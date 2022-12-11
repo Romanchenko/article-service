@@ -3,7 +3,7 @@ from bertopic import BERTopic
 import re
 import spacy
 from nltk.corpus import stopwords
-
+nlp = spacy.load('en_core_web_sm')
 
 class TopicModeling:
 
@@ -17,7 +17,6 @@ class TopicModeling:
             text = [text]
         for idx, txt in enumerate(text):
             regex = re.compile('[A-Za-z]+')
-            nlp = spacy.load('en_core_web_sm')
             mystopwords = stopwords.words('english') + ['paper', 'result', 'experiment', 'from', 'subject',
                                                         're', 'edu', 'use', 'data', 'method', 'based',
                                                         'new', 'approach', 'also', 'system', 'model',
