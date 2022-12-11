@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from ..models.citation import UNIVERSAL_KEYWORD
 from .auth import oauth2_scheme, get_user
 from .. import storage
-from ..storage.authors_storage import insert_author, find_author, find_authors_by_name
+from ..storage.authors_storage import insert_author, find_author, find_whole_authors_by_name
 from ..service.citation_service import delete_citation_by_author
 from ..service.recommendations import recommend
 from ..models.author import Author, Authors
@@ -28,7 +28,7 @@ def get_author(id: str, token: str = Depends(oauth2_scheme)):
 @router.get("/author", tags=["authors"], response_model=Author)
 def get_author(name: str, token: str = Depends(oauth2_scheme)):
     user = get_user(token)
-    result = find_authors_by_name(name, full_math=True)
+    result = find_whole_authors_by_name(name, full_math=True)
     if len(result) == 0:
         raise HTTPException(status_code=404, detail="Item not found")
     return result[0]

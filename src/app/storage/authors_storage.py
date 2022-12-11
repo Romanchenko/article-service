@@ -19,6 +19,10 @@ def find_authors_by_name(author_name: str, full_math: bool):
     return list(deserialize(author).id for author in COLLECTION.find(expr))
 
 
+def find_whole_authors_by_name(author_name: str, full_math: bool):
+    expr = {'name': author_name} if full_math else {'name': {'$regex': author_name, '$options': 'i'}}
+    return list(deserialize(author) for author in COLLECTION.find(expr))
+
 def insert_author(document: Author):
     COLLECTION.insert_one(document.serialize())
 
