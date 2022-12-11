@@ -1,24 +1,25 @@
 from tqdm import tqdm
-from .text_preprocess import text_preprocessing
-from bertopic import BERTopic
 from ..storage.articles_storage import get_all_cursor, update_tag
+from .model_inf import TopicModeling
+
+model_runner = None
 
 
-def score_data(model, logger):
-    topics_dict = dict(zip(model.get_topic_info()['Topic'], model.get_topic_info()['Name']))
+def score_data(logger):
+    global model_runner
+    if model_runner is None:
+        model_runner = TopicModeling('/models/bert_model_100k')
     for article in tqdm(get_all_cursor()):
         abstract = article['abstract']
         article_id = article['_id']
-        preprocessed_abstract = text_preprocessing(abstract)
-        topics, prob = model.transform(preprocessed_abstract)
+        topics = model_runner.score_text(abstract)
         if len(topics) > 0:
-            logger.info(f"Will update {article_id} article with topic {topics_dict[topics[0]]}")
-            update_tag(article_id, tag=topics_dict[topics[0]])
+            logger.info(f"Will update {article_id} article with topic {topics[0]}")
+            update_tag(article_id, tag=topics[0])
         else:
             logger.info(f"Empty topics for article {article_id}")
 
 
 def update_scores(logger):
-    model = BERTopic.load('/models/bert_model_100k')
-    score_data(model, logger)
+    score_data(logger)
 
