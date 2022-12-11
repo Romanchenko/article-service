@@ -1,6 +1,8 @@
 import logging.config
 import pickle
 from collections import defaultdict, Counter
+from time import sleep
+
 from .model_inf import TopicModeling
 from ..storage.articles_storage import get_all_cursor_authors
 from .general_logging import get_logging_conf
@@ -65,12 +67,13 @@ class RecommendationSystem:
         self.top_authors = self.get_top_authors()
 
     def try_refresh(self):
-        if len(self.klusters_top) == 0 or len(self.train_dct_of_links) == 0:
+        while len(self.klusters_top) == 0 or len(self.train_dct_of_links) == 0:
             with open(CLUSTER_TOP, 'rb') as file:
                 self.klusters_top = pickle.load(file)
             with open(COLLABS_FILE, 'rb') as file:
                 self.train_dct_of_links = pickle.load(file)
             self.top_authors = self.get_top_authors()
+            sleep(0.1)
 
     def get_top_authors(self, top=1000):
         authors_by_collaborators = [(author, len(collaborators)) for author, collaborators in
@@ -78,10 +81,9 @@ class RecommendationSystem:
         authors_by_collaborators.sort(key=lambda x: -x[1])  # fixed sort order
 
         log.info(f"Get top authors length: {len(authors_by_collaborators)}")
-        out = [None] * top
+        out = []
         for i in range(min(top, len(authors_by_collaborators))):
-            out[i] = authors_by_collaborators[i][0]
-
+            out.append(authors_by_collaborators[i][0])
         return out
 
     @staticmethod
@@ -136,8 +138,9 @@ class RecommendationSystem:
     def get_recommendation(self, top=10, author_id=None, lst_of_articles=None):
         self.try_refresh()
         if (author_id is None) or (author_id not in self.train_dct_of_links):
+            log.info("Will go in first branch")
             if lst_of_articles is None:
-                return self.top_authors[-top:]
+                return self.top_authors[:top]
 
             out = self.get_recommendations_on_articles(top=top,
                                                        lst_of_articles=lst_of_articles)
@@ -145,6 +148,7 @@ class RecommendationSystem:
             return out
 
         else:
+            log.info("Will go in second branch")
             all_recommendation = set()
             first_layer = self.train_dct_of_links[author_id]
 
@@ -170,3 +174,4 @@ def recommend(author_id, top=10):
             collabs = pickle.load(collabs_file)
             rs = RecommendationSystem('/models/bert_model_100k', collabs, clusters)
     recs = rs.get_recommendation(author_id=author_id, top=top)
+    return recs
