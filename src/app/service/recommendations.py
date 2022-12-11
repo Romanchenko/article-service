@@ -1,70 +1,52 @@
 import pickle
-import re
-import spacy
-import random
-from bertopic import BERTopic
 from collections import defaultdict, Counter
-from tqdm import tqdm
-from nltk.corpus import stopwords
+from .model_inf import TopicModeling
+from ..storage.articles_storage import get_all_cursor
 
 
-klusters_top = defaultdict(list)
-for item, label in tqdm(zip(df.author_ids.values, df.labels.values)):
-    for author in list(map(lambda x: x.strip(), item.split(";"))):
-        if author != "":
-            flag = False
-            for lst in klusters_top[label]:
-                if lst[0] == author:
-                    lst[1] += 1
-                    flag = True
-                    break
-            if flag is False:
-                klusters_top[label].append([author, 1])
+def count_clusters(logger):
+    klusters_top = defaultdict(dict)
+    collabs = defaultdict(set)
 
-for key, value in tqdm(klusters_top.items()):
-    value.sort(key=lambda x: -x[1])
-    klusters_top[key] = np.array(klusters_top[key])
+    for document in get_all_cursor():
+        authors = document['authors']
+        label = document['tag']
+        for author in authors:
+            if author != "":
+                if author in klusters_top[label]:
+                    klusters_top[label][author] += 1
+                else:
+                    klusters_top[label][author] = 1
+        for author1 in authors:
+            for author2 in authors:
+                if author1 != author2:
+                    collabs[author1].add(author2)
 
-with open("klusters_top.pkl", "wb") as file:
-    pickle.dump(klusters_top, file)
+    logger.info(f"Finished scanning documents")
+    klusters_top_sorted = {}
+    for label_key, dict_value in klusters_top.items():
+        sorted_results = sorted(list(dict_value.items()), key=lambda x: -x[1])
+        klusters_top_sorted[label_key] = sorted_results
 
-class TopicModeling:
+    collabs_list = {}
+    for author, coauthors in collabs.items():
+        collabs_list[author] = list(coauthors)
 
-    def __init__(self, path_to_model: str):
-        self.bert_model = BERTopic.load(path_to_model)
-        self.topic_dict = dict(zip(self.bert_model.get_topic_info()['Topic'],
-                                   self.bert_model.get_topic_info()['Name']))
+    logger.info(f"Start dumping dict with {len(collabs_list)} authors")
+    with open("/models/collabs.pkl", "wb") as file:
+        pickle.dump(collabs_list, file)
+    logger.info(f"Dumped dict with {len(collabs_list)} authors")
 
-    def text_preprocessing(self, text):
-        if isinstance(text, str):
-            text = [text]
-        for idx, txt in enumerate(text):
-            regex = re.compile('[A-Za-z]+')
-            nlp = spacy.load('en_core_web_sm')
-            mystopwords = stopwords.words('english') + ['paper', 'result', 'experiment', 'from', 'subject',
-                                                        're', 'edu', 'use', 'data', 'method', 'based',
-                                                        'new', 'approach', 'also', 'system', 'model',
-                                                        'present', 'research', 'propose', 'base']
-
-            text[idx] = ' '.join(regex.findall(txt))
-            doc = nlp(txt)
-            text[idx] = ' '.join([token.lemma_ for token in doc])
-            text[idx] = ' '.join([token for token in txt.split() if not token in mystopwords])
-
-        return text
-
-    def score_text(self, text):
-        text = self.text_preprocessing(text)
-        topics, prob = self.bert_model.transform(text)
-        for idx, topic in enumerate(topics):
-            topics[idx] = self.topic_dict[topic]
-        return topics
+    logger.info(f"Start dumping dict with {len(klusters_top_sorted)} labels")
+    with open("/models/klusters_top.pkl", "wb") as file:
+        pickle.dump(klusters_top_sorted, file)
+    logger.info(f"Dumped dict with {len(klusters_top_sorted)} labels")
 
 
 class Recommendation_system:
 
-    def __init__(self, model, train_dct_of_links, klusters_top):
-        self.model = model
+    def __init__(self, model_path, train_dct_of_links, klusters_top):
+        self.model = TopicModeling(model_path)
         self.train_dct_of_links = train_dct_of_links
         self.klusters_top = klusters_top
         self.top_authors = self.get_top_authors()
@@ -72,7 +54,7 @@ class Recommendation_system:
     def get_top_authors(self, top=1000):
         authors_by_collaborators = [(author, len(collaborators)) for author, collaborators in
                                     self.train_dct_of_links.items()]
-        authors_by_collaborators.sort(key=lambda x: x[1])
+        authors_by_collaborators.sort(key=lambda x: -x[1])  # fixed sort order
 
         out = [None] * top
         for i in range(top):
@@ -130,7 +112,7 @@ class Recommendation_system:
         return out
 
     def get_recommendation(self, top=10, author_id=None, lst_of_articles=None):
-        if author_id is None:
+        if (author_id is None) or (author_id not in self.train_dct_of_links):
             if lst_of_articles is None:
                 return self.top_authors[-top:]
 
@@ -139,7 +121,7 @@ class Recommendation_system:
 
             return out
 
-        elif author_id in self.train_dct_of_links:
+        else:
             all_recommendation = set()
             first_layer = self.train_dct_of_links[author_id]
 
@@ -153,12 +135,3 @@ class Recommendation_system:
 
             self.add_recommendations_from_top(all_recommendation, top)
             return all_recommendation
-
-        elif author_id not in self.train_dct_of_links:
-            if lst_of_articles is None:
-                return self.top_authors[-top:]
-
-            out = self.get_recommendations_on_articles(top=top,
-                                                       lst_of_articles=lst_of_articles)
-
-            return out
