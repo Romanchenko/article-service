@@ -38,8 +38,8 @@ class IndexModel:
         return embeddings
 
     def batch_predict(self, titles, k=10):
-        idx = [self.id_map_index[i] for i in titles]
-        titles = self.df_train[self.df_train.index.isin(idx)].title.tolist()
+        # idx = [self.id_map_index[i] for i in titles]
+        # titles = self.df_train[self.df_train.index.isin(idx)].title.tolist()
         embeddings = self.encode(titles)
         embedding = embeddings.mean(dim=0).numpy()
         k_search = self.index.search(embedding.reshape(1, -1), k)[1]

@@ -84,7 +84,7 @@ def get_all_cursor_authors():
 
 
 def get_ids_by_author(author_id: str):
-    return [str(x['_id']) for x in COLLECTION.find(
+    return [x['title'] for x in COLLECTION.find(
         {'authors': author_id},
         projection={ID_FIELD: 1, 'title': 1}
     )]
