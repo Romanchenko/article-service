@@ -5,7 +5,7 @@ import torch
 
 from transformers import BertTokenizer, BertModel
 from typing import Iterable, Optional, List
-from ..storage.articles_storage import get_titles_by_author
+from ..storage.articles_storage import get_ids_by_author
 
 
 class IndexModel:
@@ -46,7 +46,7 @@ class IndexModel:
         return [self.index_map_id[i] for i in k_search[0]]
 
     def predict(self, id_author, k=10):
-        list_titles = get_titles_by_author(id_author)
+        list_titles = get_ids_by_author(id_author)
         return self.batch_predict(list_titles, k)
 
 
