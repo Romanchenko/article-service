@@ -29,6 +29,8 @@ class IndexModel:
         self.id_map_index = {v: k for k, v in self.index_map_id.items()}
 
     def encode(self, texts: List[str], do_norm: bool = True) -> torch.Tensor:
+        print('Called encode with texts')
+        print(f'Texts: {texts}')
         encoded_input = self.tokenizer(texts, padding=True, truncation=True, max_length=512, return_tensors='pt')
         with torch.no_grad():
             model_output = self.model(**encoded_input.to(self.model.device))
