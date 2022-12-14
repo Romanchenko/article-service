@@ -45,7 +45,7 @@ class IndexModel:
         embeddings = self.encode(titles)
         embedding = embeddings.mean(dim=0).numpy()
         k_search = self.index.search(embedding.reshape(1, -1), k)[1]
-        return [self.index_map_id[i] for i in k_search[0]]
+        return [self.df_train.iloc[i].title for i in k_search[0]]
 
     def predict(self, id_author, k=10):
         list_titles = get_ids_by_author(id_author)
@@ -60,4 +60,5 @@ def predict(author_id: str) -> List[str]:
     if index_model is None:
         index_model = IndexModel(index_path='/models/faiss_index', data_path='/models/data')
 
-    return index_model.predict(author_id)
+    ids = index_model.predict(author_id)
+

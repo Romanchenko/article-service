@@ -83,5 +83,4 @@ def get_top(author_id: str, count: Optional[int], token: str = Depends(oauth2_sc
 def get_top(author_id: str, token: str = Depends(oauth2_scheme)):
     user = get_user(token)
     recs = predict(author_id)
-    docs = list(map(lambda x: storage.articles_storage.find_article(ObjectId(x)), recs))
-    return Articles(articles=docs)
+    return Articles(articles=recs)

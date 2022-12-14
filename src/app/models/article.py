@@ -48,7 +48,7 @@ class Article(BaseModel):
 
 
 class Articles(BaseModel):
-    articles: List[Article]
+    articles: List[str]
 
     class Config:
         arbitrary_types_allowed = True
