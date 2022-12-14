@@ -61,4 +61,5 @@ def predict(author_id: str) -> List[str]:
         index_model = IndexModel(index_path='/models/faiss_index', data_path='/models/data')
 
     ids = index_model.predict(author_id)
+    return ids
 
