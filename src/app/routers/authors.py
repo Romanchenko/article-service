@@ -3,15 +3,18 @@ from typing import Optional
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends
 
+from ..models.article import Articles
 from ..models.citation import UNIVERSAL_KEYWORD
 from .auth import oauth2_scheme, get_user
 from .. import storage
 from ..storage.authors_storage import insert_author, find_author, find_whole_authors_by_name
 from ..service.citation_service import delete_citation_by_author
 from ..service.recommendations import recommend
+from ..service.article_recommender import predict
 from ..models.author import Author, Authors
 from .id_info import IdInfo
 from ..storage import citation_storage
+from ..storage import articles_storage
 
 router = APIRouter()
 
@@ -74,3 +77,10 @@ def get_top(author_id: str, count: Optional[int], token: str = Depends(oauth2_sc
     recs = recommend(author_id, top=count)
     authors = list(map(lambda x: storage.authors_storage.find_author(ObjectId(x)), recs))
     return Authors(authors=authors)
+
+
+@router.get("/stats/authors/rec/articles", tags=["authors"], response_model=Articles)
+def get_top(author_id: str, token: str = Depends(oauth2_scheme)):
+    user = get_user(token)
+    recs = predict(author_id)
+    return Articles(articles=recs)

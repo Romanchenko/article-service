@@ -1,5 +1,6 @@
 # pull official base image
-FROM python:3.8-slim-buster
+#FROM python:3.8-slim-buster
+FROM continuumio/anaconda3:latest
 
 # set work directory
 WORKDIR /usr/src/app
@@ -24,5 +25,6 @@ RUN pip install --upgrade pip setuptools wheel \
     && rm -rf /root/.cache/pip
 RUN python -m nltk.downloader stopwords
 RUN python -m spacy download en_core_web_sm
+RUN conda install -c pytorch faiss-cpu
 # copy project
 ADD app /usr/src/app/app
