@@ -42,7 +42,7 @@ services:
       - ./mongo_seed:/docker-entrypoint-initdb.d
 
   front:
-    image: alexcei64/streamlit_made
+    image: alexcei64/streamlit_made:no_latest
     ports:
       - '8501:8501'
     environment:
