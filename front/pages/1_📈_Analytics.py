@@ -1,10 +1,18 @@
 import os
+import ast
 import json
 import urllib
 import hashlib
+
+import pandas as pd
 import requests
 import streamlit as st
+import plotly.express as px
+import plotly.graph_objs as go
+
+from wordcloud import WordCloud, STOPWORDS
 from streamlit_login_auth_ui.widgets import __login__
+
 
 HOST = f"http://{os.getenv('WEB_ADDRESS', 'localhost:8002')}"
 
@@ -68,32 +76,78 @@ if LOGGED_IN == True:
     headers = {"Authorization": f"Bearer {access_token}"}
 
     if st.button('Получить топ авторов по цитированию'):
-        response = requests.get(HOST + "/stats/authors/top/?count=10", headers=headers)
+        response = requests.get(HOST + "/stats/authors/top?count=10", headers=headers)
         if response.status_code == 200:
             for auth in response.json()['authors']:
                 st.write(auth['name'])
 
 
+    if st.button('Получить статистику количества статей по годам'):
+        df = pd.read_csv('pages/count_for_year.csv', index_col='year')
+        fig = px.line(df)
+        fig.update_layout(showlegend=False,
+                          xaxis_title="Год",
+                          yaxis_title="Количество")
+        st.plotly_chart(fig, use_container_width=True)
 
 
+    def plotly_wordcloud(text):
+        wc = WordCloud(stopwords=set(STOPWORDS),
+                       max_words=200,
+                       max_font_size=100)
+        wc.generate(text)
+
+        word_list = []
+        freq_list = []
+        fontsize_list = []
+        position_list = []
+        orientation_list = []
+        color_list = []
+
+        for (word, freq), fontsize, position, orientation, color in wc.layout_:
+            word_list.append(word)
+            freq_list.append(freq)
+            fontsize_list.append(fontsize)
+            position_list.append(position)
+            orientation_list.append(orientation)
+            color_list.append(color)
+
+        x = []
+        y = []
+        for i in position_list:
+            x.append(i[0])
+            y.append(i[1])
+
+        new_freq_list = []
+        for i in freq_list:
+            new_freq_list.append(i * 100)
 
 
-    # progress_bar = st.sidebar.progress(0)
-    # status_text = st.sidebar.empty()
-    # last_rows = np.random.randn(1, 1)
-    # chart = st.line_chart(last_rows)
-    #
-    # for i in range(1, 101):
-    #     new_rows = last_rows[-1, :] + np.random.randn(5, 1).cumsum(axis=0)
-    #     status_text.text("%i%% Complete" % i)
-    #     chart.add_rows(new_rows)
-    #     progress_bar.progress(i)
-    #     last_rows = new_rows
-    #     time.sleep(0.05)
-    #
-    # progress_bar.empty()
-    #
-    # # Streamlit widgets automatically run the script from top to bottom. Since
-    # # this button is not connected to any other logic, it just causes a plain
-    # # rerun.
-    # st.button("Re-run")
+        trace = go.Scatter(x=x,
+                           y=y,
+                           textfont=dict(size=new_freq_list,
+                                         color=color_list),
+                           hoverinfo='text',
+                           hovertext=['{0}{1}'.format(w, f) for w, f in zip(word_list, freq_list)],
+                           mode='text',
+                           text=word_list
+                           )
+
+        layout = go.Layout({'xaxis': {'showgrid': False, 'showticklabels': False, 'zeroline': False},
+                            'yaxis': {'showgrid': False, 'showticklabels': False, 'zeroline': False}})
+
+        fig = go.Figure(data=[trace], layout=layout)
+
+        return fig
+
+    years = [1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006,2007,
+             2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020]
+    option = st.selectbox('Выбирите год за который хотите получить статистики по ключевым словам', years)
+    if st.button('Получить статистику по ключевым словам'):
+        df_keywords = pd.read_csv('pages/keywords.csv')
+        tmp = df_keywords[df_keywords.year == option].keywords
+        tmp = tmp.dropna()
+        tmp = tmp.apply(lambda x: ast.literal_eval(x))
+        text = [' '.join(i) for i in tmp]
+        text = ' '.join(text)
+        st.plotly_chart(plotly_wordcloud(text))
